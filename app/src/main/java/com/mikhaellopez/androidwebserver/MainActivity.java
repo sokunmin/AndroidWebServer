@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,6 +21,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.File;
+
 /**
  * Created by Mikhael LOPEZ on 14/12/2015.
  */
@@ -28,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int DEFAULT_PORT = 8080;
 
     // INSTANCE OF ANDROID WEB SERVER
-    private AndroidWebServer androidWebServer;
+//    private AndroidWebServer androidWebServer;
+    private SimpleWebServer simpleWebServer;
     private BroadcastReceiver broadcastReceiverNetworkState;
     private static boolean isStarted = false;
 
@@ -38,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton floatingActionButtonOnOff;
     private View textViewMessage;
     private TextView textViewIpAccess;
+    private String myIpAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,8 +89,16 @@ public class MainActivity extends AppCompatActivity {
                 if (port == 0) {
                     throw new Exception();
                 }
-                androidWebServer = new AndroidWebServer(port);
-                androidWebServer.start();
+//                androidWebServer = new AndroidWebServer(port);
+//                androidWebServer.start();
+                String rootDir = new File(Environment.getExternalStorageDirectory(), "outputMp4").toString();
+                TextView textViewPath = findViewById(R.id.textViewPath);
+                TextView textViewMessage = findViewById(R.id.textViewMessage);
+                textViewPath.setText(rootDir);
+                if (!new File(rootDir).exists())
+                    textViewMessage.setText(rootDir + " does not exist.");
+                simpleWebServer = SimpleWebServer.getInstance(myIpAddress, port, rootDir, false, "*", null);
+                simpleWebServer.start();
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -96,8 +109,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean stopAndroidWebServer() {
-        if (isStarted && androidWebServer != null) {
-            androidWebServer.stop();
+        if (isStarted && simpleWebServer != null) {
+            simpleWebServer.stop();
             return true;
         }
         return false;
@@ -125,8 +138,8 @@ public class MainActivity extends AppCompatActivity {
     private String getIpAccess() {
         WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
         int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
-        final String formatedIpAddress = String.format("%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff), (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
-        return "http://" + formatedIpAddress + ":";
+        myIpAddress = String.format("%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff), (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
+        return "http://" + myIpAddress + ":";
     }
 
     private int getPortFromEditText() {

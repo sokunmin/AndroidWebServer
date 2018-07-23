@@ -52,6 +52,16 @@
                     android:textStyle="bold" />
 
             </LinearLayout>
+            <TextView
+                android:id="@+id/textViewPath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="50dp"
+                android:layout_marginTop="50dp"
+                android:gravity="center"
+                android:textSize="18sp"/>
 
             <TextView
                 android:id="@+id/textViewMessage"
